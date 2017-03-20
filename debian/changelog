@@ -1,0 +1,5 @@
+ring-kde (2.1.0-1) unstable; urgency=medium
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- Rohan Garg <rohan@kde.org>  Mon, 20 Mar 2017 10:48:02 +0100
