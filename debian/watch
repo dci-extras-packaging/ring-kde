@@ -1,0 +1,3 @@
+version=4
+https://github.com/KDE/ring-kde/releases .*/@ANY_VERSION@@ARCHIVE_EXT@
+
