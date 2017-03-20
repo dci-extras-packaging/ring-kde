@@ -1,8 +1,9 @@
 # ring-kde
-Packaging ring-kde, ring-daemon, libringclient, opendht
-
 Overview:
 https://gerrit-ring.savoirfairelinux.com/#/admin/projects/
+
+
+# Packaging ring-kde, libringclient, ring-daemon, opendht
 
 ring-kde:
 https://github.com/KDE/ring-kde/commits/master
