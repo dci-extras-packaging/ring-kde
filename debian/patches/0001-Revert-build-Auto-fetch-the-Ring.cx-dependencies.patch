@@ -1,0 +1,259 @@
+From bb7a087b9ba330d176a944d7a815a7a8fec08c97 Mon Sep 17 00:00:00 2001
+From: Rohan Garg <rohan@garg.io>
+Date: Wed, 29 Mar 2017 13:31:13 +0200
+Subject: [PATCH] Revert "build: Auto-fetch the Ring.cx dependencies"
+
+This reverts commit 0f52f5849137bc2d37a52ea2a659007d23ed470c.
+---
+ .gitignore                      |  1 +
+ CMakeLists.txt                  | 13 ++-----
+ cmake/FetchRing-LRC.cmake       | 80 -----------------------------------------
+ src/CMakeLists.txt              | 11 +++---
+ src/conf/account/CMakeLists.txt |  4 +--
+ src/klib/CMakeLists.txt         |  8 +++--
+ 6 files changed, 18 insertions(+), 99 deletions(-)
+ delete mode 100644 cmake/FetchRing-LRC.cmake
+
+diff --git a/.gitignore b/.gitignore
+index 63707901..21efb061 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -17,6 +17,7 @@ src/ring-kde.shell
+ CMakeCache.txt
+ CMakeLists.txt.user
+ CTestTestfile.cmake
++*.cmake
+ CMakeFiles/
+ CMakeTmp/
+ qtcreator-build/
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7018b590..b687b712 100755
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -20,17 +20,10 @@ SET(KF5_DEP_VERSION "5.6.0" )
+ SET(AKO_DEP_VERSION "4.89.0")
+ 
+ SET(LOCAL_CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/" )
+-LIST(APPEND CMAKE_MODULE_PATH "${LOCAL_CMAKE_MODULE_PATH}")
++SET(CMAKE_MODULE_PATH       "${CMAKE_MODULE_PATH} ${LOCAL_CMAKE_MODULE_PATH}" )
+ 
+ FIND_PACKAGE(ECM 1.1.0 REQUIRED NO_MODULE)
+-LIST(APPEND CMAKE_MODULE_PATH "${ECM_MODULE_PATH}")
+-
+-FIND_PACKAGE ( LibRingClient QUIET CONFIG)
+-
+-# Download Ring-LRC
+-IF(NOT ringclient_FOUND)
+-   INCLUDE(cmake/FetchRing-LRC.cmake)
+-ENDIF()
++SET (CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
+ 
+ INCLUDE(ECMInstallIcons)
+ INCLUDE(ECMOptionalAddSubdirectory)
+@@ -90,7 +83,7 @@ FIND_PACKAGE(KF5 "${KF5_DEP_VERSION}" REQUIRED COMPONENTS
+   GlobalAccel
+ )
+ 
+-FIND_PACKAGE(KF5 "${AKO_DEP_VERSION}" QUIET COMPONENTS
++FIND_PACKAGE(KF5 "${AKO_DEP_VERSION}" COMPONENTS
+   Akonadi
+   AkonadiContact
+   Contacts
+diff --git a/cmake/FetchRing-LRC.cmake b/cmake/FetchRing-LRC.cmake
+deleted file mode 100644
+index a0975b7f..00000000
+--- a/cmake/FetchRing-LRC.cmake
++++ /dev/null
+@@ -1,80 +0,0 @@
+-# In case dring and Ring-LRC are not found, fetch them from git and curl to
+-# setup a minimal environment capable of building Ring-KDE. It also enable
+-# static libraries to isolate Ring-KDE from any potential LRC API break.
+-#
+-# Ring-GNOME also enable static libraries for the same reason. This module
+-# doesn't produce a "ready to use" binary. The daemon is still a separate
+-# process. Single binary Ring isn't officially supported on Linux and sending
+-# patches to keep it working upstream will only annoy its maintainer before
+-# being ignored.
+-
+-CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
+-
+-find_package(Git REQUIRED)
+-include(ExternalProject)
+-
+-# Fetch the XMLs
+-set(XML_PATH ${CMAKE_CURRENT_BINARY_DIR}/xml/)
+-
+-if (NOT EXISTS ${XML_PATH}/cx.ring.Ring.CallManager.xml)
+-
+-    message(STATUS "Downloading the GNU Ring API definition")
+-
+-    file(DOWNLOAD https://raw.githubusercontent.com/savoirfairelinux/ring-daemon/master/bin/dbus/cx.ring.Ring.CallManager.xml
+-        ${XML_PATH}cx.ring.Ring.CallManager.xml INACTIVITY_TIMEOUT 30)
+-
+-    file(DOWNLOAD https://raw.githubusercontent.com/savoirfairelinux/ring-daemon/master/bin/dbus/cx.ring.Ring.ConfigurationManager.xml
+-        ${XML_PATH}cx.ring.Ring.ConfigurationManager.xml INACTIVITY_TIMEOUT 30)
+-
+-    file(DOWNLOAD https://raw.githubusercontent.com/savoirfairelinux/ring-daemon/master/bin/dbus/cx.ring.Ring.Instance.xml
+-        ${XML_PATH}cx.ring.Ring.Instance.xml INACTIVITY_TIMEOUT 30)
+-
+-    file(DOWNLOAD https://raw.githubusercontent.com/savoirfairelinux/ring-daemon/master/bin/dbus/cx.ring.Ring.PresenceManager.xml
+-        ${XML_PATH}cx.ring.Ring.PresenceManager.xml INACTIVITY_TIMEOUT 30)
+-
+-    file(DOWNLOAD https://raw.githubusercontent.com/savoirfairelinux/ring-daemon/master/bin/dbus/cx.ring.Ring.VideoManager.xml
+-        ${XML_PATH}cx.ring.Ring.VideoManager.xml INACTIVITY_TIMEOUT 30)
+-
+-    file(DOWNLOAD https://raw.githubusercontent.com/savoirfairelinux/ring-daemon/master/bin/dbus/cx.ring.Ring.VideoManager.xml
+-        ${XML_PATH}cx.ring.Ring.VideoManager.xml INACTIVITY_TIMEOUT 30)
+-
+-    # Fetch the constants
+-    file(DOWNLOAD https://raw.githubusercontent.com/savoirfairelinux/ring-daemon/master/src/dring/account_const.h
+-        ${CMAKE_CURRENT_BINARY_DIR}/dring/account_const.h INACTIVITY_TIMEOUT 30)
+-
+-    file(DOWNLOAD https://raw.githubusercontent.com/savoirfairelinux/ring-daemon/master/src/dring/security_const.h
+-        ${CMAKE_CURRENT_BINARY_DIR}/dring/security_const.h INACTIVITY_TIMEOUT 30)
+-
+-    file(DOWNLOAD https://raw.githubusercontent.com/savoirfairelinux/ring-daemon/master/src/dring/media_const.h
+-        ${CMAKE_CURRENT_BINARY_DIR}/dring/media_const.h INACTIVITY_TIMEOUT 30)
+-
+-    file(DOWNLOAD https://raw.githubusercontent.com/savoirfairelinux/ring-daemon/master/src/dring/call_const.h
+-        ${CMAKE_CURRENT_BINARY_DIR}/dring/call_const.h INACTIVITY_TIMEOUT 30)
+-endif()
+-
+-message(STATUS "Fetching Ring-LRC from GitHub")
+-
+-if (NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/ring-lrc)
+-    execute_process(COMMAND
+-        git clone https://github.com/Elv13/ring-lrc.git --branch work5 ${CMAKE_CURRENT_BINARY_DIR}/ring-lrc
+-    )
+-else()
+-    execute_process(COMMAND
+-        /bin/sh -c "cd ${CMAKE_CURRENT_BINARY_DIR}/ring-lrc && git fetch origin && git reset --hard origin/work5"
+-    )
+-endif()
+-
+-# Build Ring-LRC
+-SET(RING_XML_INTERFACES_DIR ${XML_PATH})
+-
+-get_filename_component(BIN_DIR_NAME ${CMAKE_CURRENT_BINARY_DIR} NAME)
+-
+-SET(ring_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}/dring/)
+-
+-LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_BINARY_DIR}/ring-lrc/cmake/")
+-
+-ADD_SUBDIRECTORY(${CMAKE_CURRENT_BINARY_DIR}/ring-lrc/)
+-
+-SET(LibRingClient_DIR ${CMAKE_CURRENT_BINARY_DIR}/${BIN_DIR_NAME}/ring-lrc/)
+-
+-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/ring-lrc/src)
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index b01a7c0d..4a250e38 100755
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -18,6 +18,9 @@ SET(QT_MIN_VERSION  "5.2.0")
+ FIND_PACKAGE ( KF5 REQUIRED )
+ 
+ FIND_PACKAGE (ECM 1.1.0 REQUIRED NO_MODULE)
++set (CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
++
++FIND_PACKAGE ( LibRingClient REQUIRED ENABLE_STATIC=true )
+ 
+ IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+   FIND_LIBRARY(OSX_FRAMEWORK_OPENGL NAMES OpenGL)
+@@ -145,7 +148,7 @@ INCLUDE_DIRECTORIES(SYSTEM
+    ${Qt5PrintSupport_INCLUDES}
+    ${Qt5Core_INCLUDES}
+    ${CMAKE_BINARY_DIR}
+-   ${ringclient_INCLUDE_DIR}
++   ${LIB_RING_CLIENT_INCLUDE_DIR}
+    ${LIB_TIP_INCLUDE}
+    ${LIB_CONFIG_INCLUDE}
+    ${LIB_CONFIG_WIDGETS}
+@@ -357,12 +360,12 @@ IF(NOT ${ENABLE_STATIC} MATCHES false)
+   ADD_DEFINITIONS(${Qt5DBus_CFLAGS})
+   TARGET_LINK_LIBRARIES(ring-kde
+     ${Qt5DBus_LIBRARIES}
+-    ${ringclient_LIBRARY_STATIC}
++    ${LIB_RING_CLIENT_LIBRARY_STATIC}
+     -lpthread
+     -lrt
+   )
+ ELSE()
+-   TARGET_LINK_LIBRARIES(ring-kde ${ringclient_LIBRARY_DYNAMIC})
++   TARGET_LINK_LIBRARIES(ring-kde ${LIB_RING_CLIENT_LIBRARY_DYNAMIC})
+ ENDIF()
+ 
+ QT5_ADD_DBUS_ADAPTOR(ring_kde_SRCS ../data/org.kde.kuiserver.xml cmd.h Cmd )
+@@ -371,7 +374,7 @@ TARGET_LINK_LIBRARIES(ring-kde
+   libkring
+   tip
+   accountdialog
+-  ringclient
++  ${LIB_RING_CLIENT_LIBRARY}
+   ${OPENGL_link}
+ 
+   # Qt5
+diff --git a/src/conf/account/CMakeLists.txt b/src/conf/account/CMakeLists.txt
+index 44237347..da538cbc 100644
+--- a/src/conf/account/CMakeLists.txt
++++ b/src/conf/account/CMakeLists.txt
+@@ -36,7 +36,7 @@ INCLUDE_DIRECTORIES(SYSTEM
+    ${Qt5Widgets_INCLUDES}
+    ${Qt5Core_INCLUDES}
+    ${CMAKE_BINARY_DIR}
+-   ${ringclient_INCLUDE_DIR}
++   ${LIB_RING_CLIENT_INCLUDE_DIR}
+    ${CMAKE_SOURCE_DIR}
+ )
+ 
+@@ -88,7 +88,7 @@ TARGET_LINK_LIBRARIES(accountdialog
+    ${Qt5Widgets_LIBRARIES}
+    ${Qt5Core_LIBRARIES}
+    ${Qt5Gui_LIBRARIES}
+-   ringclient
++   ${LIB_RING_CLIENT_LIBRARY}
+ )
+ 
+ IF ((${KF5_I18n_FOUND}) AND (${KF5_KIO_FOUND}) AND (${KF5_GuiAddons_FOUND}))
+diff --git a/src/klib/CMakeLists.txt b/src/klib/CMakeLists.txt
+index 48a63eb3..ec30d4d6 100644
+--- a/src/klib/CMakeLists.txt
++++ b/src/klib/CMakeLists.txt
+@@ -21,6 +21,7 @@ IF(POLICY CMP0028)
+ ENDIF(POLICY CMP0028)
+ 
+ FIND_PACKAGE(ECM 1.1.0 REQUIRED NO_MODULE)
++SET (CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
+ 
+ INCLUDE(ECMInstallIcons)
+ INCLUDE(ECMOptionalAddSubdirectory)
+@@ -43,7 +44,7 @@ FIND_PACKAGE(KF5 REQUIRED COMPONENTS
+   XmlGui
+ )
+ 
+-FIND_PACKAGE(KF5 QUIET COMPONENTS
++FIND_PACKAGE(KF5 COMPONENTS
+   Akonadi
+   AkonadiContact
+   Contacts
+@@ -53,7 +54,8 @@ IF ( KF5_AKONADI_FOUND AND  KF5_AKONADICONTACT_FOUND AND  KF5_CONTACTS_FOUND)
+    SET(AKONADI_FOUND 1)
+ ENDIF()
+ 
+-INCLUDE_DIRECTORIES(SYSTEM ${Qt5Widgets_INCLUDES} ${Qt5Core_INCLUDES} ${ringclient_INCLUDE_DIR})
++
++INCLUDE_DIRECTORIES(SYSTEM ${Qt5Widgets_INCLUDES} ${Qt5Core_INCLUDES} ${LIB_RING_CLIENT_INCLUDE_DIR})
+ 
+ ADD_DEFINITIONS(${Qt5Core_DEFINITIONS})
+ 
+@@ -80,7 +82,7 @@ KCONFIG_ADD_KCFG_FILES (libkring_LIB_SRCS kcfg_settings.kcfgc)
+ ADD_LIBRARY( libkring  STATIC ${libkring_LIB_SRCS} )
+ 
+ target_link_libraries( libkring
+-  ringclient
++  ${LIB_RING_CLIENT_LIBRARY}
+ 
+   Qt5::Widgets
+   Qt5::Core
+-- 
+2.11.0
+
