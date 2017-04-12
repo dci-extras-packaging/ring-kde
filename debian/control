@@ -30,7 +30,11 @@ Homepage: https://cgit.kde.org/ring-kde.git/
 
 Package: ring-kde
 Architecture: any
-Depends: ring-daemon, ${misc:Depends}, ${shlibs:Depends}
+Depends: qml-module-qtquick-templates2,
+         qml-module-qtquick2,
+         ring-daemon,
+         ${misc:Depends},
+         ${shlibs:Depends}
 Description: KDE client for the Ring communication framework
  KDE client for the Ring communication framework
  .
