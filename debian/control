@@ -30,7 +30,8 @@ Homepage: https://cgit.kde.org/ring-kde.git/
 
 Package: ring-kde
 Architecture: any
-Depends: qml-module-qtquick-templates2,
+Depends: qml-module-qtquick-controls2,
+         qml-module-qtquick-templates2,
          qml-module-qtquick2,
          ring-daemon,
          ${misc:Depends},
