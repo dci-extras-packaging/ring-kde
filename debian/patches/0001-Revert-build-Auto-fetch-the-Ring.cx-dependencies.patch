@@ -46,8 +46,8 @@ This reverts commit 0f52f5849137bc2d37a52ea2a659007d23ed470c.
  
  INCLUDE(ECMInstallIcons)
  INCLUDE(ECMOptionalAddSubdirectory)
-@@ -90,7 +83,7 @@
-   GlobalAccel
+@@ -91,7 +84,7 @@
+   Declarative
  )
  
 -FIND_PACKAGE(KF5 "${AKO_DEP_VERSION}" QUIET COMPONENTS
@@ -159,7 +159,7 @@ This reverts commit 0f52f5849137bc2d37a52ea2a659007d23ed470c.
     ${LIB_TIP_INCLUDE}
     ${LIB_CONFIG_INCLUDE}
     ${LIB_CONFIG_WIDGETS}
-@@ -359,12 +362,12 @@
+@@ -358,12 +361,12 @@
    ADD_DEFINITIONS(${Qt5DBus_CFLAGS})
    TARGET_LINK_LIBRARIES(ring-kde
      ${Qt5DBus_LIBRARIES}
@@ -175,7 +175,7 @@ This reverts commit 0f52f5849137bc2d37a52ea2a659007d23ed470c.
  
  QT5_ADD_DBUS_ADAPTOR(ring_kde_SRCS ../data/org.kde.kuiserver.xml cmd.h Cmd )
 @@ -374,7 +377,7 @@
-   libwizard
+   libvideo
    tip
    accountdialog
 -  ringclient
