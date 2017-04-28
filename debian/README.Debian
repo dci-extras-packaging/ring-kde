@@ -3,15 +3,9 @@ Overview:
 https://gerrit-ring.savoirfairelinux.com/#/admin/projects/
 
 
-# Packaging ring-kde, libringclient, ring-daemon, opendht
+# Packaging for ring-kde, next branch
 
 ring-kde:
-https://github.com/KDE/ring-kde/commits/master
+https://github.com/KDE/ring-kde/tree/next
+https://cgit.kde.org/ring-kde.git/log/?h=next
 
-https://cgit.kde.org/ring-kde.git/
-
-ring-lrc:
-https://gerrit-ring.savoirfairelinux.com/#/q/project:ring-lrc
-
-ring-daemon:
-https://gerrit-ring.savoirfairelinux.com/#/q/project:ring-daemon
