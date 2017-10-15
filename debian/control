@@ -27,7 +27,8 @@ Build-Depends: debhelper (>= 9),
                qtbase5-dev,
                qtquickcontrols2-5-dev,
                qttools5-dev,
-               qttools5-dev-tools
+               qttools5-dev-tools,
+               ring-dev
 Standards-Version: 3.9.8
 Homepage: https://cgit.kde.org/ring-kde.git/
 
