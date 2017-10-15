@@ -3,7 +3,7 @@
 	dh $@ --with kf5
 
 override_dh_auto_configure:
-	dh_auto_configure -- --trace
+	dh_auto_configure -- --trace --trace-expand
 
 override_dh_install:
 	dh_install
